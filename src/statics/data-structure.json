@@ -1,0 +1,44 @@
+{
+    "users": {
+        "user1": {
+            "name": "Jonathan",
+            "email": "j@g.com",
+            "online": true
+        },
+        "user2": {
+            "name": "Daniel",
+            "email": "d@g.com",
+            "online": false
+        }
+    },
+    "chats": {
+        "user1": {
+            "user2": {
+                "message1": {
+                    "text": "Hola ¿Cómo estás",
+                    "from": "them",
+                    "date": ""
+                },
+                "message2": {
+                    "text": "Bien ¿Tú qué tal?",
+                    "from": "me",
+                    "date": ""
+                }
+            }
+        },
+        "user2": {
+            "user1": {
+                "message1": {
+                    "text": "Hola ¿Cómo estás",
+                    "from": "me",
+                    "date": ""
+                },
+                "message2": {
+                    "text": "Bien ¿Tú qué tal?",
+                    "from": "them",
+                    "date": ""
+                }
+            }
+        }
+    }
+}
