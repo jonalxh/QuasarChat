@@ -48,14 +48,18 @@ const actions = { /* Parecido a mutations pero puede ser asíncrono y manipular 
       console.log('TCL: loginUser -> error', error)
     })
   },
-  logoutUser () {
+  logoutUser ({ commit, dispatch }) {
     firebaseAuth.signOut()
+    dispatch('firebaseUpdateUser', {
+      userId: state.userDetails.userId,
+      updates: {
+        online: false
+      }
+    })
+    commit('setUserDetails', {})
   },
   handleAuthStateChanged ({ commit, dispatch, state }) {
-    console.log('User auth changed')
     firebaseAuth.onAuthStateChanged(user => {
-      console.log('TCL: handleAuthStateChanged -> user', user)
-      // let userId = firebaseAuth.currentUser.uid
       if (user) {
         firebaseRealtime.ref('users/' + user.uid).once('value', snapshot => { // Once ejecuta una sola vez
           let userDetails = snapshot.val()
@@ -76,14 +80,9 @@ const actions = { /* Parecido a mutations pero puede ser asíncrono y manipular 
         })
         dispatch('firebaseGetUsers')
       } else {
-        this.$router.push('/auth')
-        dispatch('firebaseUpdateUser', {
-          userId: state.userDetails.userId,
-          updates: {
-            online: false
-          }
-        })
-        commit('setUserDetails', {})
+        if (this.$router.currentRoute.fullPath !== '/auth') {
+          this.$router.push('/auth')
+        }
       }
     })
   },
@@ -127,7 +126,6 @@ const actions = { /* Parecido a mutations pero puede ser asíncrono y manipular 
     }
   },
   firebaseSendMessage (algo, payload) {
-    console.log('TCL: firebaseSendMessage -> payload', payload)
     firebaseRealtime.ref('chats/' + state.userDetails.userId + '/' + payload.otherUserId).push(payload.message)
     payload.message.from = 'them'
     firebaseRealtime.ref('chats/' + payload.otherUserId + '/' + state.userDetails.userId).push(payload.message)
