@@ -9,9 +9,9 @@
           @click="leftDrawerOpen = !leftDrawerOpen"
           icon="menu"
           aria-label="Menu"
-          v-if="$route.fullPath !== '/chat'"
+          v-if="!$route.fullPath.includes('/chat')"
         />
-        <q-btn icon="arrow_back" flat dense v-if="$route.fullPath === '/chat'" v-go-back.single/>
+        <q-btn icon="arrow_back" flat dense v-if="$route.fullPath.includes('/chat')" v-go-back.single/>
 
         <q-toolbar-title class="absolute-center">
           {{ title }}
@@ -52,7 +52,7 @@
           </q-item-section>
           <q-item-section>
             <q-item-label>Cerrar sesión</q-item-label>
-            <q-item-label caption>{{ userDetails.name }}</q-item-label>
+            <q-item-label caption>Has iniciado como: {{ userDetails.name }}</q-item-label>
           </q-item-section>
         </q-item>
       </q-list>
@@ -66,9 +66,10 @@
 
 <script>
 import { mapState, mapActions } from 'vuex'
-export default {
-  name: 'MyLayout',
+import mixinOtherUserDetails from 'src/mixins/mixin-other-user-details.js'
 
+export default {
+  mixins: [mixinOtherUserDetails],
   data () {
     return {
       leftDrawerOpen: false
@@ -78,7 +79,7 @@ export default {
     ...mapState('store', ['userDetails']),
     title () {
       let currentPath = this.$route.fullPath
-      return currentPath === '/' ? 'Contactos' : currentPath === '/chat' ? 'Chats' : 'Autenticación'
+      return currentPath === '/' ? 'Contactos' : currentPath.includes('/chat') ? this.otherUserDetails.name : 'Autenticación'
     }
   },
   methods: {
