@@ -5,7 +5,7 @@
       <q-item v-for="(user, key) in users" :key="key" class="q-my-sm" clickable v-ripple :to="'/chat/' + key">
         <q-item-section avatar>
           <q-avatar color="primary" text-color="white">
-            {{ user.name.charAt(0) }}
+            {{ user.name.charAt(0).toUpperCase() }}
           </q-avatar>
         </q-item-section>
 

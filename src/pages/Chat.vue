@@ -1,9 +1,6 @@
 
 <template>
   <q-page class="page-chat flex column" ref="pageChat">
-    <q-banner class="bg-grey-4 text-center" v-if="!otherUserDetails.online">
-      {{ otherUserDetails.name }} is offline
-    </q-banner>
     <div class="q-pa-md column col justify-end" :class="{ 'invisible' : !showMessages }">
       <q-chat-message
         v-for="(message, key) in messages"
@@ -11,8 +8,18 @@
         :name="message.from == 'me' ? '' : otherUserDetails.name"
         :text="[message.text]"
         :sent="message.from == 'me' ? true : false"
+        :stamp="message.date ? formatDate(message.date) : ''"
       />
+
+      <transition
+        appear
+        enter-active-class="animated fadeInLeft"
+        leave-active-class="animated fadeOutLeft"
+      >
+        <q-btn color="primary" icon="keyboard_arrow_down" id="scroll-to-bottom" round class="fixed-bottom-left shadow-6" @click="scrollToBottom" v-if="scrolledToTop"/>
+      </transition>
     </div>
+
     <q-footer elevated>
       <q-toolbar>
         <q-form @submit="sendMessage" class="full-width">
@@ -37,23 +44,44 @@
 
 <script>
 import { mapState, mapActions } from 'vuex'
+import { date, scroll } from 'quasar'
 import mixinOtherUserDetails from 'src/mixins/mixin-other-user-details.js'
+const { getScrollTarget, setScrollPosition } = scroll
 
 export default {
   mixins: [mixinOtherUserDetails],
   data () {
     return {
       newMessage: '',
-      showMessages: false
+      showMessages: false,
+      scrolledToTop: false
     }
   },
   methods: {
     ...mapActions('store', ['firebaseGetMessages', 'firebaseStopGettingMessages', 'firebaseSendMessage']),
+    formatDate (dateObject) {
+      const now = new Date()
+      let formatted
+      let diff = date.getDateDiff(now, dateObject, 'days')
+      if (diff === 0) {
+        diff = date.getDateDiff(now, dateObject, 'hours')
+        if (diff === 0) {
+          diff = date.getDateDiff(now, dateObject, 'minutes')
+          formatted = 'Hace ' + diff + (diff <= 1 ? ' minutos' : ' minutos')
+        } else {
+          formatted = 'Hace ' + diff + (diff <= 1 ? ' hora' : ' horas')
+        }
+      } else {
+        formatted = date.formatDate(dateObject, 'DD/MM/YY h:mm A')
+      }
+      return formatted
+    },
     sendMessage () {
       this.firebaseSendMessage({
         message: {
           text: this.newMessage,
-          from: 'me'
+          from: 'me',
+          date: Date.now()
         },
         otherUserId: this.$route.params.otherUserId
       })
@@ -61,10 +89,22 @@ export default {
       this.$refs.newMessage.focus()
     },
     scrollToBottom () {
-      let pageChat = this.$refs.pageChat.$el
-      setTimeout(() => {
-        window.scrollTo(0, pageChat.scrollHeight)
-      }, 20)
+      const el = this.$refs.pageChat.$el
+      const target = getScrollTarget(el)
+      const offset = el.scrollHeight
+      const duration = 1000
+      setScrollPosition(target, offset, duration)
+    },
+    scroll () {
+      window.onscroll = () => {
+        let bottomOfWindow = Math.max(window.pageYOffset, document.documentElement.scrollTop, document.body.scrollTop) + window.innerHeight === document.documentElement.offsetHeight
+
+        if (!bottomOfWindow) {
+          this.scrolledToTop = true
+        } else {
+          this.scrolledToTop = false
+        }
+      }
     }
   },
   computed: {
@@ -82,6 +122,7 @@ export default {
   },
   mounted () {
     this.firebaseGetMessages(this.$route.params.otherUserId)
+    this.scroll()
   },
   destroyed () {
     this.firebaseStopGettingMessages()
@@ -110,4 +151,8 @@ export default {
   .q-message
     z-index 1
     opacity 1
+  #scroll-to-bottom
+    z-index 2
+    bottom 60px
+    left 10px
 </style>
