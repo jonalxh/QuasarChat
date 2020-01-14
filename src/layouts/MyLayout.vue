@@ -20,24 +20,29 @@
       </q-toolbar>
     </q-header>
 
-      <!-- show-if-above -->
+    <q-footer reveal elevated bordered>
+      <q-tabs>
+        <q-route-tab v-for="item in navs" :icon="item.icon" :label="item.label" :to="item.to" :key="item.label"/>
+      </q-tabs>
+    </q-footer>
+
     <q-drawer
       v-model="leftDrawerOpen"
       bordered
-      content-class="bg-grey-2"
+      content-class="bg-primary"
     >
-      <q-list>
-        <q-item-label header>Menú principal</q-item-label>
-        <q-item clickable tag="a" to="/" v-if="userDetails.userId">
+      <q-list class="text-grey-4">
+        <q-item-label header class="text-white">Menú principal</q-item-label>
+        <q-item clickable exact to="/" v-if="userDetails.userId" class="text-white">
           <q-item-section avatar>
             <q-icon name="record_voice_over" />
           </q-item-section>
           <q-item-section>
             <q-item-label>Contactos</q-item-label>
-            <q-item-label caption>Listado de contactos</q-item-label>
+            <q-item-label caption class="text-grey-5">Listado de contactos</q-item-label>
           </q-item-section>
         </q-item>
-        <q-item clickable tag="a" to="/info">
+        <q-item clickable exact to="/info">
           <q-item-section avatar>
             <q-icon name="info_outline" />
           </q-item-section>
@@ -46,7 +51,7 @@
             <q-item-label caption>Información relevante de la app</q-item-label>
           </q-item-section>
         </q-item>
-        <q-item clickable tag="a" to="/auth" v-if="!userDetails.userId">
+        <q-item clickable exact to="/auth" v-if="!userDetails.userId">
           <q-item-section avatar>
             <q-icon name="lock_open" />
           </q-item-section>
@@ -55,7 +60,7 @@
             <q-item-label caption>Login y registro</q-item-label>
           </q-item-section>
         </q-item>
-        <q-item clickable tag="a" v-else @click="logoutUser">
+        <q-item clickable v-else @click="logoutUser">
           <q-item-section avatar>
             <q-icon name="exit_to_app" />
           </q-item-section>
@@ -81,7 +86,13 @@ export default {
   mixins: [mixinOtherUserDetails],
   data () {
     return {
-      leftDrawerOpen: false
+      leftDrawerOpen: false,
+      navs: [
+        { label: 'Contactos', icon: 'record_voice_over', to: '/' },
+        { label: 'Autenticación', icon: 'lock_open', to: '/auth' },
+        { label: 'Info', icon: 'info_outline', to: '/info' },
+        { label: 'Cerrar sesión', icon: 'exit_to_app', to: '/logout' }
+      ]
     }
   },
   computed: {
@@ -96,3 +107,9 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+.q-router-link--exact-active{
+  color: white;
+}
+</style>

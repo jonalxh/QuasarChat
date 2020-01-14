@@ -8,7 +8,7 @@
         :name="message.from == 'me' ? '' : otherUserDetails.name"
         :text="[message.text]"
         :sent="message.from == 'me' ? true : false"
-        :stamp="message.date ? formatDate(message.date) : ''"
+        :stamp="message.date | formatDate"
       />
 
       <transition
@@ -31,6 +31,7 @@
             rounded
             label="Escribe aquí"
             dense
+            v-autofocus
           >
             <template v-slot:after>
               <q-btn round dense flat @click="sendMessage" color="white" icon="send"/>
@@ -59,23 +60,6 @@ export default {
   },
   methods: {
     ...mapActions('store', ['firebaseGetMessages', 'firebaseStopGettingMessages', 'firebaseSendMessage']),
-    formatDate (dateObject) {
-      const now = new Date()
-      let formatted
-      let diff = date.getDateDiff(now, dateObject, 'days')
-      if (diff === 0) {
-        diff = date.getDateDiff(now, dateObject, 'hours')
-        if (diff === 0) {
-          diff = date.getDateDiff(now, dateObject, 'minutes')
-          formatted = 'Hace ' + diff + (diff <= 1 ? ' minutos' : ' minutos')
-        } else {
-          formatted = 'Hace ' + diff + (diff <= 1 ? ' hora' : ' horas')
-        }
-      } else {
-        formatted = date.formatDate(dateObject, 'DD/MM/YY h:mm A')
-      }
-      return formatted
-    },
     sendMessage () {
       this.firebaseSendMessage({
         message: {
@@ -104,6 +88,32 @@ export default {
         } else {
           this.scrolledToTop = false
         }
+      }
+    }
+  },
+  filters: {
+    formatDate (dateObject) {
+      const now = new Date()
+      let formatted
+      let diff = date.getDateDiff(now, dateObject, 'days')
+      if (diff === 0) {
+        diff = date.getDateDiff(now, dateObject, 'hours')
+        if (diff === 0) {
+          diff = date.getDateDiff(now, dateObject, 'minutes')
+          formatted = 'Hace ' + diff + (diff <= 1 ? ' minutos' : ' minutos')
+        } else {
+          formatted = 'Hace ' + diff + (diff <= 1 ? ' hora' : ' horas')
+        }
+      } else {
+        formatted = date.formatDate(dateObject, 'DD/MM/YY h:mm A')
+      }
+      return formatted
+    }
+  },
+  directives: {
+    autofocus: {
+      inserted (elem) {
+        elem.focus()
       }
     }
   },
